@@ -6,8 +6,19 @@ from datetime import datetime
 class User(Base):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30))
-    todo: Mapped[list["Todo"]] = relationship(back_populates="user")
+    telegram_id: Mapped[int] = mapped_column(unique= True)
+    todo: Mapped[list["Profile"]] = relationship(back_populates="user")
+
+class Profile(Base):
+    __tablename__ = "profile"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str | None] = mapped_column(String(30))
+    todo: Mapped[list["Todo"]] = relationship(back_populates="profile")
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id", ondelete="CASCADE"),
+        unique=True
+    )
+    user: Mapped["User"] = relationship(back_populates="profile")
 
 class Todo(Base):
     __tablename__ = "todo"
@@ -17,8 +28,8 @@ class Todo(Base):
     create_at: Mapped[datetime] = mapped_column(default= datetime.now)
     is_active: Mapped[bool] = mapped_column(default= True)
 
-    user_id: Mapped[int] = mapped_column(
+    profile_id: Mapped[int] = mapped_column(
         ForeignKey("user.id", ondelete="CASCADE"),
         unique=True
     )
-    user: Mapped["User"] = relationship(back_populates="todo")
+    profile: Mapped["Profile"] = relationship(back_populates="todo")
